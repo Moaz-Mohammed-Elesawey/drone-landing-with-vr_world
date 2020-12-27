@@ -1,6 +1,9 @@
 import cv2
 import numpy as np
 
+from helpers import euc
+
+
 '''
 	# GREEN HSV VALUES (10:45, 40:255, 10:255), (65:255, 255, 255)
 	# RED HSV VALUES (0, 30:235, 0:230), (0:45, 255, 255)
@@ -16,11 +19,14 @@ def main(cam=0):
 	while cap.isOpened():
 
 		_, frame = cap.read()
+
 		WIDTH, HEIGHT, _ = frame.shape
+		FRAME_CENTER = WIDTH//2, WIDTH//2
+
 		frame = cv2.resize(frame, (HEIGHT//2, WIDTH//2))
+		FRAME_CENTER = frame.shape[1]//2, frame.shape[0]//2
 
 		hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
 
 		lower_red = np.array([0, 200, 200],  dtype=np.uint8)
 		upper_red = np.array([20, 255, 255], dtype=np.uint8)
@@ -40,17 +46,25 @@ def main(cam=0):
 			circles_len = circles.shape[0]
 			# print(circles.shape)
 			circles = np.sort(circles, axis=0)
-			print(circles)
+
 			if circles_len > 25:
 				circles = circles[(circles_len//2)-5:(circles_len//2)+5]
 				circles = np.sum(circles, axis=0) / circles_len
 			else:
 				circles = np.sum(circles, axis=0) / circles_len
-			# circles = circles[0]
+
 			x, y, r = map(int, circles)
 			cv2.circle(frame, (x, y), r, YELLOW, 3)
-			cv2.circle(frame, (x, y), r+60, TERQUIZE, 3)
+			cv2.circle(frame, (x, y), r+90, TERQUIZE, 3)
 
+			cv2.line(frame, (x, y), FRAME_CENTER, YELLOW, 2)
+
+			distance_from_center = euc((x, y), FRAME_CENTER)
+			# print(f'{int(distance_from_center) = }')
+			if distance_from_center > r:
+				print(f'[WARNING] DRONE OUT BOUNDARIES = {int(distance_from_center)}')
+
+		cv2.circle(frame, FRAME_CENTER, 2, (255,255,255), 5)
 
 		cv2.imshow('res_red', res_red)
 		cv2.imshow('frame', frame)
