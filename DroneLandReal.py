@@ -80,6 +80,8 @@ def main(cam=0):
 
 			# cv2.imshow('res_red', res_red)
 			cv2.imshow('frame', frame)
+		else:
+			s.sendto('quit'.encode('utf-8'), ADDRESS)
 
 		if cv2.waitKey(25) & 0xFF == ord('q'):
 			cap.release()

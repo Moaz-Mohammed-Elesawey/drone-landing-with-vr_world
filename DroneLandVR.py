@@ -1,5 +1,6 @@
 from ursina import *
 import socket
+from threading import Thread
 
 
 window.borderless = False
@@ -23,6 +24,26 @@ ground_out = Entity(model='circle', color=color.green,
 ground_in = Entity(model='circle', color=color.red,
 			position=Vec3(0,-3.4, 10), rotation_x=90, scale=(3,3,3))
 
+x, z = 0, 0
+
+def recv_data():
+	global x
+	global z
+
+	try:
+		while True:
+			data, addr = s.recvfrom(1024)
+			if data.decode('utf-8') == 'quit':
+				break
+			x, z = map(float, data.decode('utf-8').split(','))
+
+			print(x, z)
+
+	except ValueError as e:
+		print(str(e))
+
+recv_thread = Thread(target=recv_data)
+recv_thread.start()
 
 def update():
 
@@ -30,21 +51,10 @@ def update():
 
 	move_drone()
 	move_cam()
-	recv_data('data.txt')
 
+	ent.x = x*1.5
+	ent.z = z*1.5
 
-def recv_data(file):
-
-	try:
-		data, addr = s.recvfrom(1024)
-		x, z = map(float, data.decode('utf-8').split(','))
-		ent.x = x*1.5
-		ent.z = z*1.5
-		
-		print(x, z)
-
-	except ValueError as e:
-		print(str(e))
 
 def move_cam():
 	if held_keys['c']:
