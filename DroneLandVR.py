@@ -7,7 +7,7 @@ camera.orthographic = True
 
 app = Ursina()
 
-ent = Entity(model='drone', color=color.black66,
+ent = Entity(model='drone', color=color.rgb(6, 23, 2),
 			scale=(.5,.5,.5), position=Vec3(0,2.7, 10))
 
 ground_out = Entity(model='circle', color=color.green,
