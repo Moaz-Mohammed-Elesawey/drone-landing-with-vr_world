@@ -1,9 +1,9 @@
 from ursina import *
 
 window.borderless = False
+window.size = 640, 360
 
 camera.orthographic = True
-#camera.position = Vec3(10, 0, 10)
 
 app = Ursina()
 
@@ -14,7 +14,7 @@ ground_out = Entity(model='circle', color=color.green,
 			position=Vec3(0,-3.5, 10), rotation_x=90, scale=(15,15,15))
 
 ground_in = Entity(model='circle', color=color.red,
-			position=Vec3(0,-3.4, 10), rotation_x=90, scale=(7,7,7))
+			position=Vec3(0,-3.4, 10), rotation_x=90, scale=(5,5,5))
 
 
 def update():
@@ -23,6 +23,19 @@ def update():
 
 	move_drone()
 	move_cam()
+	read_data('data.txt')
+
+def read_data(file):
+	with open(file) as f:
+		data = f.read().strip().split(',')
+		try:
+			x, z = map(float, data)
+			ent.x = x
+			ent.z = z
+
+			# print(x, z)
+		except ValueError as e:
+			print(str(e))
 
 def move_cam():
 	if held_keys['c']:
@@ -37,7 +50,6 @@ def move_cam():
 		camera.position += (0, 0, .1)
 	if held_keys['x']:
 		camera.position -= (0, 0, .1)
-
 
 
 
