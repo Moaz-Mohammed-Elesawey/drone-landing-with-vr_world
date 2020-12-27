@@ -1,20 +1,27 @@
 from ursina import *
+import socket
+
 
 window.borderless = False
-window.size = 640, 360
+window.size = 853, 480
 
 camera.orthographic = True
+
+ADDRESS = ('127.0.0.1', 55555)
+
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.bind(ADDRESS)
 
 app = Ursina()
 
 ent = Entity(model='drone', color=color.rgb(6, 23, 2),
-			scale=(.5,.5,.5), position=Vec3(0,2.7, 10))
+			scale=(.5,.5,.5), position=Vec3(0, -3.2, 10))
 
 ground_out = Entity(model='circle', color=color.green,
-			position=Vec3(0,-3.5, 10), rotation_x=90, scale=(15,15,15))
+			position=Vec3(0,-3.5, 10), rotation_x=90, scale=(10,10,10))
 
 ground_in = Entity(model='circle', color=color.red,
-			position=Vec3(0,-3.4, 10), rotation_x=90, scale=(5,5,5))
+			position=Vec3(0,-3.4, 10), rotation_x=90, scale=(3,3,3))
 
 
 def update():
@@ -23,19 +30,21 @@ def update():
 
 	move_drone()
 	move_cam()
-	read_data('data.txt')
+	recv_data('data.txt')
 
-def read_data(file):
-	with open(file) as f:
-		data = f.read().strip().split(',')
-		try:
-			x, z = map(float, data)
-			ent.x = x
-			ent.z = z
 
-			# print(x, z)
-		except ValueError as e:
-			print(str(e))
+def recv_data(file):
+
+	try:
+		data, addr = s.recvfrom(1024)
+		x, z = map(float, data.decode('utf-8').split(','))
+		ent.x = x*1.5
+		ent.z = z*1.5
+		
+		print(x, z)
+
+	except ValueError as e:
+		print(str(e))
 
 def move_cam():
 	if held_keys['c']:

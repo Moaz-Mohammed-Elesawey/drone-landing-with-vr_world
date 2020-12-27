@@ -3,6 +3,8 @@ import numpy as np
 
 from helpers import euc
 
+import socket
+
 
 '''
 	# GREEN HSV VALUES (10:45, 40:255, 10:255), (65:255, 255, 255)
@@ -12,11 +14,13 @@ from helpers import euc
 YELLOW = (0,255,255)
 TERQUIZE = (255,255,0)
 BLUE = (255,0,0)
+ADDRESS = ('127.0.0.1', 55555)
 
 
 def main(cam=0):
 
 	cap = cv2.VideoCapture(cam)
+	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 	while cap.isOpened():
 
@@ -57,10 +61,9 @@ def main(cam=0):
 					circles = np.sum(circles, axis=0) / circles_len
 
 				x, y, r = map(int, circles)
+				send_data = f'{str((x-(HEIGHT_//2))/100)}, {str((y-(WIDTH_//2))/100)}'
 
-				with open('data.txt', 'w') as f:
-					# f.write(f'{str(x)}, {str(y)}')
-					f.write(f'{str((x-(HEIGHT_//2))/100)}, {str((y-(WIDTH_//2))/100)}')
+				s.sendto(send_data.encode('utf-8'), ADDRESS)
 
 				cv2.circle(frame, (x, y), 3, YELLOW, 3)
 				cv2.circle(frame, (x, y), r, YELLOW, 3)
@@ -75,7 +78,7 @@ def main(cam=0):
 
 			cv2.circle(frame, FRAME_CENTER, 2, (255,255,255), 5)
 
-			cv2.imshow('res_red', res_red)
+			# cv2.imshow('res_red', res_red)
 			cv2.imshow('frame', frame)
 
 		if cv2.waitKey(25) & 0xFF == ord('q'):
